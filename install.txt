@@ -1,0 +1,7 @@
+
+PHP Android String Translation Tool
+-----------------------------------
+
+Install instructions and project info:
+http://code.google.com/p/android-php-translator/
+
