@@ -1,0 +1,35 @@
+
+body {
+	background: white;
+	font-family: Garamond, serif;
+	font-size: 10pt;
+	color: black;
+}
+
+a {
+	color: darkred;
+}
+
+tr.uneven {
+	background: #eee;
+}
+
+
+#translationtable input {
+	width: 100%;
+	height: 100%;
+	font-family: Garamond, serif;
+	font-size: 10pt;
+}
+
+#translationtable td {
+	vertical-align: top;
+}
+#org {
+	width: 34%;
+}
+
+#trans {
+	width: 54%;
+}
+
