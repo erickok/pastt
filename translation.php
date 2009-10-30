@@ -66,6 +66,7 @@
 	}
 	
 	$pageTitle = 'Edit a translation - ' . $appname;
+	include('includes/header.php');
 
 	echo '
 	<h1>Translating to ' . $iso639[$lang] . ' (' . $lang . ')</h1>';
@@ -74,7 +75,7 @@
 	$original = simplexml_load_file($basedir . '/values/strings.xml');
 	if (isset($newesttranslation)) {
 		echo '
-	<p>You are working with the last-saved translation \'' . $newesttranslation . '\'. When you save your updates it will not override it but make a new copy.</p>';
+	<p>You are working with the last-saved translation \'' . $newesttranslation . '\' (saved ' . date('d F Y H:i', filemtime($basedir . '/values-' . $lang . '/' . $newesttranslation)) . '). When you save your updates it will not override it but make a new copy.</p>';
 		$translation = simplexml_load_file($basedir . '/values-' . $lang . '/' . $newesttranslation);
 	} else {
 		echo '
