@@ -1,6 +1,7 @@
 <?php
 
 	error_reporting(E_ALL);
+	set_magic_quotes_runtime(FALSE);
 	
 	// Some global vars
 	$appname = 'PASTT: PHP Android String Translation Tool';

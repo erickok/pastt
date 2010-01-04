@@ -41,7 +41,14 @@
 		
 		// Insert all the translations
 		for ($i = 0; $i < count($original->string); $i++) {
-			$original->string[$i] = htmlspecialchars($_POST[(string)$original->string[$i]['name']]);
+			$original->string[$i] = str_replace('\'', '\\\'', stripslashes(htmlspecialchars($_POST[(string)$original->string[$i]['name']])));
+		}
+		for ($i = 0; $i < count($original->{'string-array'}); $i++) {
+			$newitems = explode(';', str_replace('\'', '\\\'', stripslashes(htmlspecialchars($_POST[(string)$original->{'string-array'}[$i]['name']]))));
+			//print_r(count($original->{'string-array'}[$i]->item));
+			for ($j = 0; $j < count($original->{'string-array'}[$i]->item); $j++) {
+				$original->{'string-array'}[$i]->item[$j] = $newitems[$j];
+			}
 		}
 		
 		// Save the new translation with a new unique number (to prevent incorrect overwriting)
@@ -94,18 +101,42 @@
 	$isuneven = false;
 	$classuneven = ' class="uneven"';
 	
-	// For every string in the original file
+	// For every string in the original (English) file
 	foreach ($original->string as $string) {
 		
-		// Use an xpath query to get the original English text
+		// Use an xpath query to get the translated text
 		$transtext = (isset($translation)? $translation->xpath('//string[@name=\'' . $string['name'] . '\']'): null);
 
 		// Show a table row that has the key, the original English text and a input box with the translation text that is editable
 		echo '
 		<tr' . ($isuneven? $classuneven: '') . '>
 			<td>' . $string['name'] . '</td>
-			<td>' . $string . '</td>
-			<td><input type="text" id="' . $string['name'] . '" name="' . $string['name'] . '" value="' . (isset($transtext) && isset($transtext[0])? stripslashes($transtext[0]): '') . '" /></td>
+			<td>' . str_replace('\\\'', '\'', $string) . '</td>
+			<td><input type="text" id="' . $string['name'] . '" name="' . $string['name'] . '" value="' . (isset($transtext) && isset($transtext[0])? str_replace('\\\'', '\'', $transtext[0]): '') . '" /></td>
+		</tr>';
+		
+		$isuneven = !$isuneven;
+		
+	}
+	
+	// For every string array in the original (English) file
+	foreach ($original->{'string-array'} as $stringarray) {
+		
+		// Use an xpath query to get the translated text
+		$transtextarray = (isset($translation)? $translation->xpath('//string-array[@name=\'' . $stringarray['name'] . '\']'): null);
+
+		// Show a table row that has the array key, the original English text values and an input box with the translation text that is editable
+		echo '
+		<tr' . ($isuneven? $classuneven: '') . '>
+			<td>' . $stringarray['name'] . '</td>
+			<td>';
+		$transitems = '';
+		for ($i=0; $i<count($stringarray->item); $i++) {
+			echo ($i > 0? ';': '') . str_replace('\\\'', '\'', $stringarray->item[$i]);
+			$transitems .= ($i > 0? ';': '') . (isset($transtextarray)? (isset($transtextarray[0])? str_replace('\\\'', '\'', $transtextarray[0]->item[$i]): ''): '');
+		}
+		echo '</td>
+			<td><input type="text" id="' . $stringarray['name'] . '" name="' . $stringarray['name'] . '" value="' . $transitems . '" /></td>
 		</tr>';
 		
 		$isuneven = !$isuneven;
