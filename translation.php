@@ -41,7 +41,13 @@
 		
 		// Insert all the translations
 		for ($i = 0; $i < count($original->string); $i++) {
-			$original->string[$i] = str_replace('\'', '\\\'', stripslashes(htmlspecialchars($_POST[(string)$original->string[$i]['name']])));
+			$new = str_replace('\'', '\\\'', stripslashes(htmlspecialchars($_POST[(string)$original->string[$i]['name']])));
+			if ($new == '') {
+				// Remove the string form the translation file if it was empty (not specified; so the app can use the original (English) version)
+				unset($original->string[$i]);
+			} else {
+				$original->string[$i] = $new;
+			}
 		}
 		for ($i = 0; $i < count($original->{'string-array'}); $i++) {
 			$newitems = explode(';', str_replace('\'', '\\\'', stripslashes(htmlspecialchars($_POST[(string)$original->{'string-array'}[$i]['name']]))));
