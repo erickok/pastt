@@ -45,6 +45,7 @@
 			if ($new == '') {
 				// Remove the string form the translation file if it was empty (not specified; so the app can use the original (English) version)
 				unset($original->string[$i]);
+				$i--;
 			} else {
 				$original->string[$i] = $new;
 			}
