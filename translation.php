@@ -65,16 +65,12 @@
 			$name = $string->getAttribute('name');
 			// Make sure the new string is free of incorrect slashes and ampersands
 			$new = stripslashes($_POST[$name]);
-			$new = str_replace('&', '&amp;', $new);
-			$new = str_replace('&amp;amp;', '&amp;', $new);
-			$new = str_replace('&amp;gt;', '&gt;', $new);
-			$new = str_replace('&amp;lt;', '&lt;', $new);
 			if ($new == '') {
 				// Remove the <string> node if it was empty (not specified; so the app can use the original (English) version)
 				$resources->removeChild($string);
 				$i--;
 			} else {
-				// Remove the 'text content child' and add a new 'text node' again to this <string> node
+				// Remove the 'text content children' and add a new 'text node' again to this <string> node
 				while ($string->hasChildNodes()) {
 					$string->removeChild($string->firstChild);
 				}
@@ -87,15 +83,11 @@
 			$name = $stringarray->getAttribute('name');
 			// Make sure the new string is free of incorrect slashes and ampersands
 			$new = stripslashes($_POST[$name]);
-			$new = str_replace('&', '&amp;', $new);
-			$new = str_replace('&amp;amp;', '&amp;', $new);
-			$new = str_replace('&amp;gt;', '&gt;', $new);
-			$new = str_replace('&amp;lt;', '&lt;', $new);
 			$newitems = explode($arraySeparator, $new);
 			$items = $stringarray->getElementsByTagName('item');
 			for ($j = 0; $j < $items->length; $j++) {
 				$item = $items->item($j);
-				// Remove the 'text content child' and add a new 'text node' again to this <item> node
+				// Remove the 'text content children' and add a new 'text node' again to this <item> node
 				while ($item->hasChildNodes()) {
 					$item->removeChild($item->firstChild);
 				}
@@ -109,7 +101,7 @@
 			mkdir($basedir . '/values-' . $lang);
 		}
 		$newfilepath = $basedir . '/values-' . $lang . '/' . $newfilename;
-		file_put_contents($newfilepath, htmlspecialchars_decode($original->saveHTML()));
+		file_put_contents($newfilepath, $original->saveXML());
 		$newesttranslation = $newfilename;
 		
 		// Send an e-mail to notify of the new translation
@@ -180,7 +172,7 @@
 		<tr' . ($isuneven? $classuneven: '') . '>
 			<td>' . $name . '</td>
 			<td>' . htmlspecialchars(str_replace('\\\'', '\'', $value), ENT_NOQUOTES) . '</td>
-			<td><input type="text" id="' . $name . '" name="' . $name . '" value="' . htmlspecialchars($transtext) . '" /></td>
+			<td><input type="text" id="' . $name . '" name="' . $name . '" value="' . str_replace('"', '&quot;', $transtext) . '" /></td>
 		</tr>';
 		
 		$isuneven = !$isuneven;
@@ -210,10 +202,10 @@
 		$transitems = '';
 		for ($i=0; $i<$values->length; $i++) {
 			echo ($i > 0? $arraySeparator: '') . htmlspecialchars(str_replace('\\\'', '\'', DOMinnerHTML($values->item($i))), ENT_NOQUOTES);
-			$transitems .= ($i > 0? $arraySeparator: '') . (isset($transtexts)? htmlspecialchars(DOMinnerHTML($transtexts->item($i))): '');
+			$transitems .= ($i > 0? $arraySeparator: '') . (isset($transtexts)? DOMinnerHTML($transtexts->item($i)): '');
 		}
 		echo '</td>
-			<td><input type="text" id="' . $name . '" name="' . $name . '" value="' . $transitems . '" /></td>
+			<td><input type="text" id="' . $name . '" name="' . $name . '" value="' . str_replace('"', '&quot;', $transitems) . '" /></td>
 		</tr>';
 		
 		$isuneven = !$isuneven;

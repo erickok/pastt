@@ -6,16 +6,16 @@
 	// http://www.apache.org/licenses/LICENSE-2.0
 	
 	error_reporting(E_ALL);
-	set_magic_quotes_runtime(FALSE);
+	@set_magic_quotes_runtime(FALSE);
 	
 	// Some global vars
 	$appname = 'PASTT: PHP Android String Translation Tool';
 	$basedir = substr($_SERVER['SCRIPT_FILENAME'], 0, strrpos($_SERVER['SCRIPT_FILENAME'], '/')) . '/res';
 	$arraySeparator = '|';
-	$sendmail = 'erickok@gmail.com';
+	$sendmail = '';
 	
 	// Check settings
-	if ($sendmail == '')
+	if ($sendmail == '' && $_SERVER['SERVER_NAME'] != 'localhost')
 		die('Please set \'$sendmail\' in \'includes/common.php\' to the e-mail address where change notifications can be mailed.');
 		
 	// Read which translations already exist
