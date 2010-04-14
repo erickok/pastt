@@ -1,5 +1,10 @@
 <?php
 
+	// PASTT: PHP Android Translation Tool
+	// http://code.google.com/p/android-php-translator/
+	// Licensed Apache License 2.0
+	// http://www.apache.org/licenses/LICENSE-2.0
+	
 	include('includes/common.php');
 	
 	$pageTitle = $appname;
@@ -49,7 +54,7 @@
 			</td>
 		</tr>
 	</table>';
-	
+
 	include('includes/footer.php');
 
 ?>

@@ -5,3 +5,7 @@ PHP Android String Translation Tool
 Install instructions and project info:
 http://code.google.com/p/android-php-translator/
 
+License:
+Apache License 2.0
+http://www.apache.org/licenses/LICENSE-2.0
+
