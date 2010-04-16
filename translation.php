@@ -12,17 +12,6 @@
 	}
 	$lang = addslashes(htmlspecialchars(strip_tags($_GET['lang'])));
 	
-	function DOMinnerHTML($element) {
-		$innerHTML = "";
-		$children = $element->childNodes;
-		foreach ($children as $child) {
-			$tmp_dom = new DOMDocument();
-			$tmp_dom->appendChild($tmp_dom->importNode($child, true));
-			$innerHTML.=' '.trim($tmp_dom->saveHTML()).' ';
-		}
-		return trim($innerHTML);
-	}
-	
 	// Get the last translation file, if it exists
 	if ($transdir = @opendir($basedir . '/values-' . $lang)) {
 	
@@ -52,56 +41,46 @@
 	// Save the updated translation?
 	if (isset($_POST['submit'])) {
 	
-		// Load the English original
-		$original = new DOMDocument();
-		$original->load($basedir . '/values/strings.xml');
-		$resources = $original->getElementsByTagName('resources')->item(0);
-		$strings = $original->getElementsByTagName('string');
-		$stringarrays = $original->getElementsByTagName('string-array');
-		
-		// Insert all the translations
-		for ($i = 0; $i < $strings->length; $i++) {
-			$string = $strings->item($i);
-			$name = $string->getAttribute('name');
-			// Make sure the new string is free of incorrect slashes and ampersands
-			$new = stripslashes($_POST[$name]);
-			if ($new == '') {
-				// Remove the <string> node if it was empty (not specified; so the app can use the original (English) version)
-				$resources->removeChild($string);
-				$i--;
+		// Insert all the translations into the original file text
+		$lines = file($basedir . '/values/strings.xml');
+		$outfile = "";
+		foreach ($lines as $line) {
+			
+			// <string> lines
+			$line = trim($line);
+			if (substr(trim($line), 0, 8) == '<string ' && substr($line, -9) == '</string>') {
+				$namePos = strpos($line, 'name="') + 6;
+				$stringPos = strPos($line, '>', $namePos) + 1;
+				$name = substr($line, $namePos, strpos($line, '"', $namePos) - $namePos);
+				$newValue = stripslashes($_POST[$name]);
+				$outfile .= substr($line, 0, $stringPos) . $newValue . substr($line, strrpos($line, '<')) . "\n";
+				
+			// <string-array> lines
+			} else if (substr($line, 0, 13) == '<string-array') {
+				$namePos = strpos($line, 'name="') + 6;
+				$name = substr($line, $namePos, strpos($line, '"', $namePos) - $namePos);
+				$newValues = explode($arraySeparator, stripslashes($_POST[$name]));
+				$n = 0;
+				$outfile .= $line . "\n";
+				
+			// <item> lines
+			} else if (substr($line, 0, 6) == '<item>') {
+				$outfile .= substr($line, 0, 6) . $newValues[$n] . substr($line, strrpos($line, '<')) . "\n";
+				$n++;
+				
 			} else {
-				// Remove the 'text content children' and add a new 'text node' again to this <string> node
-				while ($string->hasChildNodes()) {
-					$string->removeChild($string->firstChild);
-				}
-				$string->appendChild(new DOMText($new));
+				$outfile .= $line . "\n";
+				
 			}
 		}
-		
-		for ($i = 0; $i < $stringarrays->length; $i++) {
-			$stringarray = $stringarrays->item($i);
-			$name = $stringarray->getAttribute('name');
-			// Make sure the new string is free of incorrect slashes and ampersands
-			$new = stripslashes($_POST[$name]);
-			$newitems = explode($arraySeparator, $new);
-			$items = $stringarray->getElementsByTagName('item');
-			for ($j = 0; $j < $items->length; $j++) {
-				$item = $items->item($j);
-				// Remove the 'text content children' and add a new 'text node' again to this <item> node
-				while ($item->hasChildNodes()) {
-					$item->removeChild($item->firstChild);
-				}
-				$item->appendChild(new DOMText($newitems[$j]));
-			}
-		}
-		
+				
 		// Save the new translation with a new unique number (to prevent incorrect overwriting)
 		$newfilename = 'strings.' . time() . '.xml';
 		if (!is_dir($basedir . '/values-' . $lang)) {
 			mkdir($basedir . '/values-' . $lang);
 		}
 		$newfilepath = $basedir . '/values-' . $lang . '/' . $newfilename;
-		file_put_contents($newfilepath, $original->saveXML());
+		file_put_contents($newfilepath, $outfile);
 		$newesttranslation = $newfilename;
 		
 		// Send an e-mail to notify of the new translation
@@ -122,18 +101,65 @@
 	echo '
 	<h1>Translating to ' . $iso639[$lang] . ' (' . $lang . ')</h1>';
 	
+	function parseStrings($file) {
+		$lines = file($file);
+		foreach ($lines as $line) {
+			
+			// Empty lines
+			$line = trim($line);
+			if ($line == '') {
+				//$out[]['type'] = 'empty';
+				
+			// <string> lines
+			} else if (substr($line, 0, 8) == '<string ' && substr($line, -9) == '</string>') {
+				$out[]['type'] = 'string';
+				$namePos = strpos($line, 'name="') + 6;
+				$stringPos = strPos($line, '>', $namePos) + 1;
+				$name = substr($line, $namePos, strpos($line, '"', $namePos) - $namePos);
+				$string = substr($line, $stringPos, strrpos($line, '<') - $stringPos);
+				$out[count($out)-1]['name'] = $name;
+				$out[count($out)-1]['value'] = $string;
+				
+			// <string-array> lines
+			} else if (substr($line, 0, 13) == '<string-array') {
+				$out[]['type'] = 'stringarray';
+				$namePos = strpos($line, 'name="') + 6;
+				$name = substr($line, $namePos, strpos($line, '"', $namePos) - $namePos);
+				$out[count($out)-1]['name'] = $name;
+				
+			// <item> lines
+			} else if (substr($line, 0, 6) == '<item>') {
+				$val = substr($line, 6, strrpos($line, '<') - 6);
+				$out[count($out)-1]['values'][] = $val;
+				
+			}
+		}
+		return $out;
+	}
+	
+	function findTranslation($translations, $name) {
+		foreach ($translations as $translation) {
+			if ($translation['name'] == $name) {
+				return $translation;
+			}
+		}
+	}
+	
+	function dp($in) {
+		echo '<pre>';
+		print_r($in);
+		echo '</pre><br />';
+	}
+	
 	// Load the XML files
-	$original = new DOMDocument();
-	$original->load($basedir . '/values/strings.xml');
-	$strings = $original->getElementsByTagName('string');
-	$stringarrays = $original->getElementsByTagName('string-array');
+	$strings = parseStrings($basedir . '/values/strings.xml');
+	//dp($strings);
 	
 	// Load the translation XML file, if it exists
 	if (isset($newesttranslation)) {
 		echo '
 	<p>You are working with the last-saved translation \'' . $newesttranslation . '\' (saved ' . date('d F Y H:i', filemtime($basedir . '/values-' . $lang . '/' . $newesttranslation)) . '). When you save your updates it will not override it but make a new copy.</p>';
-		$translation = new DOMDocument();
-		$translation->load($basedir . '/values-' . $lang . '/' . $newesttranslation);
+		$translations = parseStrings($basedir . '/values-' . $lang . '/' . $newesttranslation);
 	} else {
 		echo '
 	<p>No translation for this language currently exists. When saving for the first time, it will create a directory and the first strings.{timestamp}.xml for this new language.</p>';
@@ -151,64 +177,44 @@
 	$isuneven = false;
 	$classuneven = ' class="uneven"';
 	
+	function encodeForHtml($in) {
+		return htmlspecialchars($in);
+	}
+	function encodeForInput($in) {
+		return str_replace(array('&','"'), array('&amp;','&quot;'), $in);
+	}
+	
 	// For every string in the original (English) file
 	foreach ($strings as $string) {
 		
-		// Use an xpath query to get the translated text
-		$name = $string->getAttribute('name');
-		$value = DOMinnerHTML($string);
+		$name = $string['name'];
 		$transtext = '';
-		if (isset($newesttranslation)) {
-			$trquery = new DOMXPath($translation);
-			$trnodes = $trquery->query('//string[@name=\'' . $name . '\']');
-			if ($trnodes->length > 0) {
-				$transtext = DOMinnerHTML($trnodes->item(0));
+		
+		if ($string['type'] == 'string') {
+			$value = $string['value'];
+			if (isset($translations)) {
+				$trans = findTranslation($translations, $name);
+				$transtext = $trans['value'];
+			}
+		} else if ($string['type'] == 'stringarray') {
+			$value = implode($arraySeparator, $string['values']);
+			if (isset($translations)) {
+				$trans = findTranslation($translations, $name);
+				$transtext = implode($arraySeparator, $trans['values']);
 			}
 		}
-		//var_dump($transtext);
+		//dp($trans);
 
 		// Show a table row that has the key, the original English text and a input box with the translation text that is editable
 		echo '
 		<tr' . ($isuneven? $classuneven: '') . '>
 			<td>' . $name . '</td>
-			<td>' . htmlspecialchars(str_replace('\\\'', '\'', $value), ENT_NOQUOTES) . '</td>
-			<td><input type="text" id="' . $name . '" name="' . $name . '" value="' . str_replace('"', '&quot;', $transtext) . '" /></td>
+			<td>' . encodeForHtml($value) . '</td>
+			<td><input type="text" id="' . $name . '" name="' . $name . '" value="' . encodeForInput($transtext) . '" /></td>
 		</tr>';
 		
 		$isuneven = !$isuneven;
 		
-	}
-	
-	// For every string array in the original (English) file
-	
-	foreach ($stringarrays as $stringarray) {
-		
-		// Use an xpath query to get the translated text
-		$name = $stringarray->getAttribute('name');
-		$values = $stringarray->getElementsByTagName('item');
-		if (isset($newesttranslation)) {
-			$trquery = new DOMXPath($translation);
-			$trnodes = $trquery->query('//string-array[@name=\'' . $name . '\']');
-			if ($trnodes->length > 0) {
-				$transtexts = $trnodes->item(0)->getElementsByTagName('item');
-			}
-		}
-
-		// Show a table row that has the array key, the original English text values and an input box with the translation text that is editable
-		echo '
-		<tr' . ($isuneven? $classuneven: '') . '>
-			<td>' . $name . '</td>
-			<td>';
-		$transitems = '';
-		for ($i=0; $i<$values->length; $i++) {
-			echo ($i > 0? $arraySeparator: '') . htmlspecialchars(str_replace('\\\'', '\'', DOMinnerHTML($values->item($i))), ENT_NOQUOTES);
-			$transitems .= ($i > 0? $arraySeparator: '') . (isset($transtexts)? DOMinnerHTML($transtexts->item($i)): '');
-		}
-		echo '</td>
-			<td><input type="text" id="' . $name . '" name="' . $name . '" value="' . str_replace('"', '&quot;', $transitems) . '" /></td>
-		</tr>';
-		
-		$isuneven = !$isuneven;
 	}
 	
 	echo '
