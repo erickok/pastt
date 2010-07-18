@@ -41,7 +41,7 @@
 	// Save the updated translation?
 	if (isset($_POST['submit'])) {
 	
-		// Insert all the translations into the original file text
+		// Traverse through the lines of the original strings file
 		$lines = file($basedir . '/values/strings.xml');
 		$outfile = "";
 		foreach ($lines as $line) {
@@ -92,7 +92,7 @@
 				$iso639[$lang] . ' (' . $lang . ') translation updated',
 				'The ' . $iso639[$lang] . ' (' . $lang . ') translation of your Android string resource file has been ' . 
 				'updated.\n\nThe new file was stored at ' . $newfilepath,
-				'From: ' . $sendmail);
+				(isset($frommail) && $frommail == '')? null: 'From: ' . $frommail);
 		}
 		
 	}

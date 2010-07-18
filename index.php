@@ -23,6 +23,7 @@
 	$classuneven = ' class="uneven"';
 	
 	if (isset($languages)) {
+		sort($languages);
 		foreach ($languages as $language) {
 			
 			// Show the language and an edit link

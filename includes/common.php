@@ -13,10 +13,11 @@
 	$basedir = substr($_SERVER['SCRIPT_FILENAME'], 0, strrpos($_SERVER['SCRIPT_FILENAME'], '/')) . '/res';
 	$arraySeparator = '|';
 	$sendmail = '';
+	$frommail = '';
 	
 	// Check settings
 	if ($sendmail == '' && $_SERVER['SERVER_NAME'] != 'localhost')
-		die('Please set \'$sendmail\' in \'includes/common.php\' to the e-mail address where change notifications can be mailed.');
+		die('Please set \'$sendmail\' in \'includes/common.php\' to the e-mail address where change notifications can be mailed. Optionally, you can set \'$frommail\' to provide a sender address.');
 		
 	// Read which translations already exist
 	if ($basehandle = opendir($basedir)) {
