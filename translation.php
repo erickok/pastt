@@ -88,17 +88,26 @@
 		
 		// Send an e-mail to notify of the new translation
 		if (isset($sendmail) && $sendmail != "") {
+			
 			if (isset($_POST['name'])) {
 				$byname = htmlspecialchars(strip_tags($_POST['name']));
 				$byemail = htmlspecialchars(strip_tags($_POST['email']));
 			}
+			
+			# Anti-header-injection
+			# By Victor Benincasa <vbenincasa(AT)gmail.com>
+			foreach($_REQUEST as $fields => $value) if(@eregi("TO:", $value) || @eregi("CC:", $value) || 
+				@eregi("CCO:", $value) || @eregi("Content-Type", $value)) exit("ERROR: Code injection attempt denied! " .
+				"Please don't use the following sequences in your message: 'TO:', 'CC:', 'CCO:' or 'Content-Type'.");
+
 			mail(
 				$sendmail,
-				$$langname . ' (' . $lang . ') translation updated',
-				'The ' . $langname . ' (' . $lang . ') translation of your Android string resource file ' . 
-				'has been updated.' . (isset($byname)? '\n\nTranslator: ' . $byname . ' (' . $byemail . ')': '') . 
-				'\n\nThe new file was stored at ' . $newfilepath,
-				(isset($frommail) && $frommail == '')? null: 'From: ' . $frommail);
+				"$langname ($lang) translation updated",
+				"The $langname ($lang) translation of your Android string resource file " . 
+				"has been updated." . (isset($byname)? "\n\nTranslator: $byname ($byemail)": "") . 
+				"\n\nThe new file was stored at $newfilepath",
+				(isset($frommail) && $frommail == '')? null: "From: $frommail");
+				
 		}
 		
 	}
