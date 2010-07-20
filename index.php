@@ -27,10 +27,11 @@
 		foreach ($languages as $language) {
 			
 			// Show the language and an edit link
+			$langgroup = substr($language, 0, 2);
 			echo '
 		<tr' . ($isuneven? $classuneven: '') . '>
 			<td>' . $language . '</td>
-			<td>' . $iso639[$language] . '</td>
+			<td>' . $iso639[$langgroup] . '</td>
 			<td><a href="translation.php?lang=' . $language . '">Edit translation</a></td>
 		</tr>';
 		

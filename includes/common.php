@@ -28,7 +28,7 @@
 		
 			// If it is a 'values-' directory, assume it is a translation resource
 			if (substr($dirname, 0, 7) == 'values-') {
-				$languages[] = substr($dirname, 7, 2);
+				$languages[] = substr($dirname, 7);
 			}
 			
 		}

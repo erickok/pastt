@@ -11,6 +11,7 @@
 		die('No language specified; this should be in the query string.');
 	}
 	$lang = addslashes(htmlspecialchars(strip_tags($_GET['lang'])));
+	$langname = $iso639[substr($lang, 0, 2)];
 	
 	// Get the last translation file, if it exists
 	if ($transdir = @opendir($basedir . '/values-' . $lang)) {
@@ -93,8 +94,8 @@
 			}
 			mail(
 				$sendmail,
-				$iso639[$lang] . ' (' . $lang . ') translation updated',
-				'The ' . $iso639[$lang] . ' (' . $lang . ') translation of your Android string resource file ' . 
+				$$langname . ' (' . $lang . ') translation updated',
+				'The ' . $langname . ' (' . $lang . ') translation of your Android string resource file ' . 
 				'has been updated.' . (isset($byname)? '\n\nTranslator: ' . $byname . ' (' . $byemail . ')': '') . 
 				'\n\nThe new file was stored at ' . $newfilepath,
 				(isset($frommail) && $frommail == '')? null: 'From: ' . $frommail);
@@ -102,11 +103,11 @@
 		
 	}
 	
-	$pageTitle = 'Editing ' . $iso639[$lang] . ' translation - ' . $appname;
+	$pageTitle = 'Editing ' . $langname . ' translation - ' . $appname;
 	include('includes/header.php');
 
 	echo '
-	<h1>Translating to ' . $iso639[$lang] . ' (' . $lang . ')</h1>';
+	<h1>Translating to ' . $langname . ' (' . $lang . ')</h1>';
 	
 	function parseStrings($file) {
 		$lines = file($file);
@@ -178,7 +179,7 @@
 		<tr>
 			<th id="key">Key</th>
 			<th id="org">English</th>
-			<th id="trans">' . $iso639[$lang] . ' (' . $lang . ')</th>
+			<th id="trans">' . $langname . ' (' . $lang . ')</th>
 		</tr>';
 	
 	$isuneven = false;
