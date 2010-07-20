@@ -8,12 +8,15 @@
 	error_reporting(E_ALL);
 	@set_magic_quotes_runtime(FALSE);
 	
-	// Some global vars
+	// Some settings
 	$appname = 'PASTT: PHP Android String Translation Tool';
-	$basedir = substr($_SERVER['SCRIPT_FILENAME'], 0, strrpos($_SERVER['SCRIPT_FILENAME'], '/')) . '/res';
-	$arraySeparator = '|';
 	$sendmail = '';
 	$frommail = '';
+	$askforemail = TRUE;
+	
+	// Some global vars
+	$basedir = substr($_SERVER['SCRIPT_FILENAME'], 0, strrpos($_SERVER['SCRIPT_FILENAME'], '/')) . '/res';
+	$arraySeparator = '|';
 	
 	// Check settings
 	if ($sendmail == '' && $_SERVER['SERVER_NAME'] != 'localhost')

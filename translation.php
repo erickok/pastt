@@ -87,17 +87,22 @@
 		
 		// Send an e-mail to notify of the new translation
 		if (isset($sendmail) && $sendmail != "") {
+			if (isset($_POST['name'])) {
+				$byname = htmlspecialchars(strip_tags($_POST['name']));
+				$byemail = htmlspecialchars(strip_tags($_POST['email']));
+			}
 			mail(
 				$sendmail,
 				$iso639[$lang] . ' (' . $lang . ') translation updated',
-				'The ' . $iso639[$lang] . ' (' . $lang . ') translation of your Android string resource file has been ' . 
-				'updated.\n\nThe new file was stored at ' . $newfilepath,
+				'The ' . $iso639[$lang] . ' (' . $lang . ') translation of your Android string resource file ' . 
+				'has been updated.' . (isset($byname)? '\n\nTranslator: ' . $byname . ' (' . $byemail . ')': '') . 
+				'\n\nThe new file was stored at ' . $newfilepath,
 				(isset($frommail) && $frommail == '')? null: 'From: ' . $frommail);
 		}
 		
 	}
 	
-	$pageTitle = 'Edit a translation - ' . $appname;
+	$pageTitle = 'Editing ' . $iso639[$lang] . ' translation - ' . $appname;
 	include('includes/header.php');
 
 	echo '
@@ -217,6 +222,21 @@
 		
 		$isuneven = !$isuneven;
 		
+	}
+	
+	if ($askforemail) {
+		echo '
+		<tr>
+			<td colspan="3">Please fill in your name and e-mail address:</td>
+		</tr>
+		<tr>
+			<td>Name:</td>
+			<td colspan="2"><input type="input" id="name" name="name" value="" /></td>
+		</tr>
+		<tr>
+			<td>E-mail:</td>
+			<td colspan="2"><input type="input" id="email" name="email" value="" /></td>
+		</tr>';
 	}
 	
 	echo '
