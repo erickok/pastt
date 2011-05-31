@@ -116,6 +116,31 @@
 	include('includes/header.php');
 
 	echo '
+	<script type="text/javascript">
+		var showOnlyMissing = false;
+		function flipShowOnlyMissing() {
+			showOnlyMissing = !showOnlyMissing;
+			var tbl = document.getElementById(\'translationtable\');
+			// Traverse through the table rows (skipping the first header row)
+			for (var i = 1; i < tbl.rows.length; i++) {
+				if (tbl.rows[i].cells.length > 2 && tbl.rows[i].cells[2].children != null) {
+					// Get the input field, which is in the third cell
+					var input = tbl.rows[i].cells[2].children[0];
+					if (input.value != \'\' && !showOnlyMissing) {
+						// Show this row (again)
+						tbl.rows[i].style.display = \'table-row\';
+					} else if (input.value != \'\') {
+						// Hide this row
+						tbl.rows[i].style.display = \'none\';
+					}
+				}
+			}
+			// Change the button text
+			var but = document.getElementById(\'showmissing\');
+			but.value = showOnlyMissing? \'Show all rows\': \'Show only missing translations\';
+		}
+	</script>
+
 	<h1>Translating to ' . $langname . ' (' . $lang . ')</h1>';
 	
 	function parseStrings($file) {
@@ -175,7 +200,8 @@
 	// Load the translation XML file, if it exists
 	if (isset($newesttranslation)) {
 		echo '
-	<p>You are working with the last-saved translation \'' . $newesttranslation . '\' (saved ' . date('d F Y H:i', filemtime($basedir . '/values-' . $lang . '/' . $newesttranslation)) . '). When you save your updates it will not override it but make a new copy.</p>';
+	<p>You are working with the last-saved translation \'' . $newesttranslation . '\' (saved ' . date('d F Y H:i', filemtime($basedir . '/values-' . $lang . '/' . $newesttranslation)) . '). When you save your updates it will not override it but make a new copy.</p>
+	<p id="showmissingrow"><input type="button" id="showmissing" name="showmissing" value="Show only missing translations" onclick="javascript:flipShowOnlyMissing();" /></p>';
 		$translations = parseStrings($basedir . '/values-' . $lang . '/' . $newesttranslation);
 	} else {
 		echo '

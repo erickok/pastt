@@ -37,3 +37,6 @@ tr.uneven {
 	color: #333;
 }
 
+#showmissingrow {
+	text-align: right;
+}

@@ -14,7 +14,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title><?php echo $pageTitle; ?></title>
         <style type="text/css">
-                @import url("includes/default.css");
+            @import url("includes/default.css");
         </style>
 </head>
 
