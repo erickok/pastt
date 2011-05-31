@@ -24,7 +24,7 @@
 		}
 		closedir($transdir);
 		
-		// Fiels should have been found here
+		// Fields should have been found here
 		if (!isset($existingfiles) || count($existingfiles) <= 0) {
 			die ('Every resource directory \'values-{lang}\' should at least have a single translation file.');
 		}

@@ -2,8 +2,12 @@
 PHP Android String Translation Tool
 -----------------------------------
 
-Install instructions and project info:
+Project info:
 http://code.google.com/p/android-php-translator/
+
+To install: unzip the latest pastt-{version}.zip to your PHP5-enabled web server. Copy your Android string resource directories 'values', 'values-nl', 'values-de', etc. to the res folder. Make sure all the 'values-' directories are readable and writeable by the web server. The res folder itself needs to be made writeable as well to add new languages. The 'values/strings.xml' file is required since it is assumed that it contains the (usually English) base version on which other translations are based.
+
+Finally rename the 'includes/settings.example.php' file to 'includes/settings.php'. Optionally you can set an e-mail address there where you are notified on translation updates.
 
 License:
 Apache License 2.0
