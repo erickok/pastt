@@ -5,6 +5,9 @@
 	// Licensed Apache License 2.0
 	// http://www.apache.org/licenses/LICENSE-2.0
 	
+	// Check access
+	if (!defined('DIRECT_ACCESSIBLE')) { die('Do not access the include files directly, but go to <a href="../">the script root</a> instead.'); }
+
 	// Adjust these settings to your liking
 	$appname = 'PASTT: PHP Android String Translation Tool';
 	$sendmail = '';

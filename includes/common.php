@@ -8,6 +8,9 @@
 	error_reporting(E_ALL);
 	@set_magic_quotes_runtime(FALSE);
 	
+	// Check access
+	if (!defined('DIRECT_ACCESSIBLE')) { die('Do not access the include files directly, but go to <a href="../">the script root</a> instead.'); }
+
 	// Load settings
 	include('settings.php');
 	
@@ -17,7 +20,7 @@
 	
 	// Check settings
 	if ($sendmail == '' && $_SERVER['SERVER_NAME'] != 'localhost')
-		die('Please set \'$sendmail\' in \'includes/settings.php\' to the e-mail address where change notifications can be mailed. Optionally, you can set \'$frommail\' to provide a sender address.');
+		die('Please set \'$sendmail\' in \'includes/settings.php\' (which might first be created by copying \'includes/settings.example.php\' if you haven\'t done so yet) to the e-mail address where change notifications can be mailed. Optionally, you can set \'$frommail\' to provide a sender address.');
 		
 	// Read which translations already exist
 	if ($basehandle = opendir($basedir)) {

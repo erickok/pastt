@@ -5,6 +5,7 @@
 	// Licensed Apache License 2.0
 	// http://www.apache.org/licenses/LICENSE-2.0
 	
+	define('DIRECT_ACCESSIBLE', TRUE);
 	include('includes/common.php');
 	
 	$pageTitle = $appname;
