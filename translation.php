@@ -12,7 +12,7 @@
 		die('No language specified; this should be in the query string.');
 	}
 	$lang = addslashes(htmlspecialchars(strip_tags($_GET['lang'])));
-	if (preg_match('/^[a-z][a-z](-[A-Z][A-Z])?$/', $lang) == 0) {
+	if (preg_match('/^[a-z][a-z](-r[A-Z][A-Z])?$/', $lang) == 0) {
 		die($lang . ' is not a valid language/locale code; should either be two letters (e.g. nl) or two letters dash two capitals (e.g. pt-BR)');
 	}
 	$langname = $iso639[substr($lang, 0, 2)];
