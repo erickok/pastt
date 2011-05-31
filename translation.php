@@ -67,7 +67,8 @@
 			} else if (substr($line, 0, 13) == '<string-array') {
 				$namePos = strpos($line, 'name="') + 6;
 				$name = substr($line, $namePos, strpos($line, '"', $namePos) - $namePos);
-				$newValues = explode($arraySeparator, stripslashes($_POST[$name]));
+				//$newValues = explode($arraySeparator, stripslashes($_POST[$name]));
+				$newValues = explode($arraySeparator, $_POST[$name]);
 				$n = 0;
 				$outfile .= $line . "\n";
 				
