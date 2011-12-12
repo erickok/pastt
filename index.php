@@ -64,6 +64,7 @@
 	}
 	echo '
 					</select>
+					<strong>-r</strong><input type="text" id="region" name="region" /> (optional region code)
 					<input type="submit" id="submit" name="submit" value="Add" />
 				</form>
 			</td>

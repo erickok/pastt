@@ -26,7 +26,7 @@ ch;Chamorro
 co;Corsican
 cr;Cree
 cs;Czech
-cu;Church Slavic, Old Slavonic, Church Slavonic, Old Bulgarian, Old Church Slavonic
+cu;Church Slavic, Old Slavonic, ...
 cv;Chuvash
 cy;Welsh
 da;Danish
@@ -62,7 +62,7 @@ ht;Haitian, Haitian Creole
 hu;Hungarian
 hy;Armenian
 hz;Herero
-ia;Interlingua (International Auxiliary Language Association)
+ia;Interlingua
 id;Indonesian
 ie;Interlingue, Occidental
 ig;Igbo
