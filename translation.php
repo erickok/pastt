@@ -113,9 +113,9 @@
 		// Send an e-mail to notify of the new translation
 		if (isset($sendmail) && $sendmail != "") {
 			
-			if (isset($_POST['name'])) {
-				$byname = htmlspecialchars(strip_tags($_POST['name']));
-				$byemail = htmlspecialchars(strip_tags($_POST['email']));
+			if (isset($_POST['pastt_translator_name'])) {
+				$byname = htmlspecialchars(strip_tags($_POST['pastt_translator_name']));
+				$byemail = htmlspecialchars(strip_tags($_POST['pastt_translator_email']));
 			}
 			
 			# Anti-header-injection
@@ -315,11 +315,11 @@
 		</tr>
 		<tr>
 			<td>Name:</td>
-			<td colspan="2"><input type="input" id="name" name="name" value="" /></td>
+			<td colspan="2"><input type="input" id="pastt_translator_name" name="pastt_translator_name" value="" /></td>
 		</tr>
 		<tr>
 			<td>E-mail:</td>
-			<td colspan="2"><input type="input" id="email" name="email" value="" /></td>
+			<td colspan="2"><input type="input" id="pastt_translator_email" name="pastt_translator_email" value="" /></td>
 		</tr>';
 	}
 	
