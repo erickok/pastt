@@ -49,6 +49,7 @@
 		// Traverse through the lines of the original strings file
 		$lines = file($basedir . '/values/strings.xml');
 		$outfile = "";
+		$multiline = "";
 		foreach ($lines as $line) {
 			
 			// <string> lines
@@ -58,28 +59,45 @@
 				$stringPos = strPos($line, '>', $namePos) + 1;
 				$name = substr($line, $namePos, strpos($line, '"', $namePos) - $namePos);
 				//$newValue = stripslashes($_POST[$name]);
-				$newValue = $_POST[$name];
+				$newValue = str_replace("\n","\\n",$_POST[$name]);
 				if (trim($newValue) != '') {
 					$outfile .= substr($line, 0, $stringPos) . $newValue . substr($line, strrpos($line, '<')) . "\n";
 				}
+				$multiline = "";
 				
+			} else if (substr(trim($line), 0, 8) == '<string ') {
+				// Support multi line strings
+				$multiline = $line;
+			
+			} else if (substr($line, -9) == '</string>') {
+				$multiline .= $line;
+				$namePos = strpos($multiline, 'name="') + 6;
+				$stringPos = strPos($multiline, '>', $namePos) + 1;
+				$name = substr($multiline, $namePos, strpos($multiline, '"', $namePos) - $namePos);
+				$newValue = str_replace("\n","\\n",stripslashes($_POST[$name]));
+				if (trim($newValue) != '') {
+					$outfile .= substr($multiline, 0, $stringPos) . $newValue . substr($multiline, strrpos($multiline, '<')) . "\n";
+				}
+				$multiline = "";
 			// <string-array> lines
 			} else if (substr($line, 0, 13) == '<string-array') {
 				$namePos = strpos($line, 'name="') + 6;
 				$name = substr($line, $namePos, strpos($line, '"', $namePos) - $namePos);
-				//$newValues = explode($arraySeparator, stripslashes($_POST[$name]));
-				$newValues = explode($arraySeparator, $_POST[$name]);
+				$newValues = explode($arraySeparator, str_replace("\n","\\n",stripslashes($_POST[$name])));
 				$n = 0;
 				$outfile .= $line . "\n";
-				
+				$multiline = "";
 			// <item> lines
 			} else if (substr($line, 0, 6) == '<item>') {
 				$outfile .= substr($line, 0, 6) . $newValues[$n] . substr($line, strrpos($line, '<')) . "\n";
 				$n++;
-				
+				$multiline = "";
 			} else {
-				$outfile .= $line . "\n";
-				
+				if ($multiline != "") {
+					$multiline .= $line;
+				} else {
+					$outfile .= $line . "\n";
+				}
 			}
 		}
 				
@@ -151,6 +169,7 @@
 	
 	function parseStrings($file) {
 		$lines = file($file);
+		$multiline = "";
 		foreach ($lines as $line) {
 			
 			// Empty lines
@@ -167,6 +186,22 @@
 				$string = substr($line, $stringPos, strrpos($line, '<') - $stringPos);
 				$out[count($out)-1]['name'] = $name;
 				$out[count($out)-1]['value'] = $string;
+				$multiline = "";
+				
+			} else if ((substr(trim($line), 0, 8) == '<string ') && ($multiline == "")) {
+				// Support multi line strings
+				$multiline = $line;
+			
+			} else if (substr($line, -9) == '</string>') {
+				$multiline .= $line;
+				$out[]['type'] = 'string';
+				$namePos = strpos($multiline, 'name="') + 6;
+				$stringPos = strPos($multiline, '>', $namePos) + 1;
+				$name = substr($multiline, $namePos, strpos($multiline, '"', $namePos) - $namePos);
+				$string = substr($multiline, $stringPos, strrpos($multiline, '<') - $stringPos);
+				$out[count($out)-1]['name'] = $name;
+				$out[count($out)-1]['value'] = $string;
+				$multiline = "";
 				
 			// <string-array> lines
 			} else if (substr($line, 0, 13) == '<string-array') {
@@ -174,12 +209,16 @@
 				$namePos = strpos($line, 'name="') + 6;
 				$name = substr($line, $namePos, strpos($line, '"', $namePos) - $namePos);
 				$out[count($out)-1]['name'] = $name;
+				$multiline = "";
 				
 			// <item> lines
 			} else if (substr($line, 0, 6) == '<item>') {
 				$val = substr($line, 6, strrpos($line, '<') - 6);
 				$out[count($out)-1]['values'][] = $val;
+				$multiline = "";
 				
+			} else if ($multiline != ""){
+				$multiline .= $line;
 			}
 		}
 		return $out;
@@ -258,9 +297,12 @@
 		echo '
 		<tr' . ($isuneven? $classuneven: '') . '>
 			<td>' . $name . '</td>
-			<td>' . encodeForHtml($value) . '</td>
-			<td><input type="text" id="' . $name . '" name="' . $name . '" value="' . encodeForInput($transtext) . '" /></td>
-		</tr>';
+			<td>' . str_replace("\\n","<br/>",encodeForHtml($value)) . '</td>
+			<td>';
+			
+			if (strpos(encodeForInput($value),"\\n") !== FALSE) echo '<textarea style="word-wrap: break-word;height:10em;width:100%" id="' . $name . '" name="' . $name . '">' . str_replace("\\n","\n",encodeForInput($transtext)) . '</textarea>';
+			else echo '<input style="word-wrap: break-word;" type="text" id="' . $name . '" name="' . $name . '" value="' . encodeForInput($transtext) . '" /></td>';
+		echo '</tr>';
 		
 		$isuneven = !$isuneven;
 		
