@@ -8,6 +8,14 @@
 	define('DIRECT_ACCESSIBLE', TRUE);
 	include('includes/common.php');
 	
+	// Default language to select?
+	include('includes/checklanguage.php');
+	$defaultLanguage = getDefaultLanguage('aa');
+	if (strlen($defaultLanguage) > 2) {
+		// Remove regional identifier
+		$defaultLanguage = substr($defaultLanguage, 0, 2);
+	}
+
 	$pageTitle = $appname;
 	include('includes/header.php');
 
@@ -47,8 +55,12 @@
 					Add a new translation for: 
 					<select id="lang" name="lang">';
 	foreach ($iso639 as $langcode => $langname) {
+		$selected = '';
+		if ($defaultLanguage == $langcode) {
+			$selected = ' selected="selected"';
+		}
 		echo '
-						<option value="' . $langcode . '">' . $langcode . ' - ' . $langname . '</option>';
+						<option value="' . $langcode . '"' . $selected . '>' . $langcode . ' - ' . $langname . '</option>';
 	}
 	echo '
 					</select>
