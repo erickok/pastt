@@ -12,7 +12,10 @@
 		die('No language specified; this should be in the query string.');
 	}
 	$lang = addslashes(htmlspecialchars(strip_tags($_GET['lang'])));
+    $region = '';
+    if ( isset( $_GET['region'] ) ) {
 	$region = addslashes(htmlspecialchars(strip_tags($_GET['region'])));
+    }
 	if (strlen($region) > 0) {
 		$lang .= '-r' . strtoupper($region);
 	}
@@ -145,6 +148,15 @@
 
 	echo '
 	<script type="text/javascript">
+		var unloadOk = false;
+		window.onbeforeunload = function() {
+			if (unloadOk === true) {
+				return null;
+			} else {
+				return \'Please make sure you don\\\'t have unsaved translations!\';
+			}
+		}
+
 		var showOnlyMissing = false;
 		function flipShowOnlyMissing() {
 			showOnlyMissing = !showOnlyMissing;
@@ -249,7 +261,7 @@
 	// Load the translation XML file, if it exists
 	if (isset($newesttranslation)) {
 		echo '
-	<p>You are working with the last-saved translation \'' . $newesttranslation . '\' (saved ' . date('d F Y H:i', filemtime($basedir . '/values-' . $lang . '/' . $newesttranslation)) . '). When you save your updates it will not override it but make a new copy.</p>
+	<p>You are working with the last-saved translation \'<a href="res/values-' . $lang . '/' . $newesttranslation . '">' . $newesttranslation . '</a>\' (saved ' . date('d F Y H:i', filemtime($basedir . '/values-' . $lang . '/' . $newesttranslation)) . '). When you save your updates it will not override it but make a new copy.</p>
 	<p id="showmissingrow"><input type="button" id="showmissing" name="showmissing" value="Show only missing translations" onclick="javascript:flipShowOnlyMissing();" /></p>';
 		$translations = parseStrings($basedir . '/values-' . $lang . '/' . $newesttranslation);
 	} else {
@@ -258,7 +270,7 @@
 	}
 	
 	echo '
-	<form id="translationform" name="translationform" method="post" action="translation.php?lang=' . $lang . '">
+	<form id="translationform" name="translationform" method="post" action="translation.php?lang=' . $lang . '" onsubmit="javascript:unloadOk=true;">
 	<table id="translationtable">
 		<tr>
 			<th id="key">Key</th>
@@ -340,4 +352,3 @@
 	include('includes/footer.php');
 
 ?>
-
