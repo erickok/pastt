@@ -13,5 +13,6 @@
 	$sendmail = '';
 	$frommail = '';
 	$askforemail = TRUE;
+	$requireemail = FALSE;
 	
 ?>

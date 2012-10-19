@@ -53,6 +53,15 @@
 	// Save the updated translation?
 	if (isset($_POST['submit'])) {
 	
+		// Require the input of a name and email address?
+		if ($requireemail) {
+			$byname = htmlspecialchars(strip_tags($_POST['pastt_translator_name']));
+			$byemail = htmlspecialchars(strip_tags($_POST['pastt_translator_email']));
+			if(strlen($byname) <= 0 || strlen($byemail) <= 0 || !preg_match("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$^", $byemail)) {
+				die('Please enter a name and valid email address. You can use the back button of the browser to recover your translations.');
+			}
+		}
+		
 		// Traverse through the lines of the original strings file
 		$lines = file($basedir . '/values/strings.xml');
 		$outfile = "";
@@ -179,6 +188,19 @@
 			var but = document.getElementById(\'showmissing\');
 			but.value = showOnlyMissing? \'Show all rows\': \'Show only missing translations\';
 		}
+		function requireNameAndEmail() {
+			var name = document.getElementById(\'pastt_translator_name\');
+			var email = document.getElementById(\'pastt_translator_email\');
+			// Regex from http://www.regular-expressions.info/email.html
+			var emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
+			if (emailRegex.test(email.value)) {
+				if (name.value.trim().length > 0) {
+					return true;
+				}
+			}
+			alert(\'Please enter a name and valid e-mail address.\');
+			return false;
+		}
 	</script>
 
 	<h1>Translating to ' . $langname . ' (' . $lang . ')</h1>';
@@ -269,8 +291,10 @@
 	<p>No translation for this language currently exists. When saving for the first time, it will create a directory and the first strings.{timestamp}.xml for this new language.</p>';
 	}
 	
+	// Require the input of a name and email address?
+	$requireemailhtml = $requireemail? 'return(requireNameAndEmail());"': '';
 	echo '
-	<form id="translationform" name="translationform" method="post" action="translation.php?lang=' . $lang . '" onsubmit="javascript:unloadOk=true;">
+	<form id="translationform" name="translationform" method="post" action="translation.php?lang=' . $lang . '" onsubmit="javascript:unloadOk=true;' . $requireemailhtml . '">
 	<table id="translationtable">
 		<tr>
 			<th id="key">Key</th>
@@ -325,9 +349,10 @@
 	}
 	
 	if ($askforemail) {
+		$requiredfieldhtml = $requireemail? ' <strong>Your are required to fill in your name and e-mail address:</strong>': 'Please fill in your name and e-mail address:';
 		echo '
 		<tr>
-			<td colspan="3">Please fill in your name and e-mail address:</td>
+			<td colspan="3">' . $requiredfieldhtml . '</td>
 		</tr>
 		<tr>
 			<td>Name:</td>
