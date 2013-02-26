@@ -99,15 +99,30 @@
 			} else if (substr($line, 0, 13) == '<string-array') {
 				$namePos = strpos($line, 'name="') + 6;
 				$name = substr($line, $namePos, strpos($line, '"', $namePos) - $namePos);
+				$skipStringArray = stripslashes($_POST[$name]) == '';
+				if ($skipStringArray) {
+					$multiline = "";
+					continue;
+				}
 				$newValues = explode($arraySeparator, str_replace("\n","\\n",stripslashes($_POST[$name])));
 				$n = 0;
 				$outfile .= $line . "\n";
 				$multiline = "";
 			// <item> lines
 			} else if (substr($line, 0, 6) == '<item>') {
+				if ($skipStringArray) {
+					$multiline = "";
+					continue;
+				}
 				$outfile .= substr($line, 0, 6) . $newValues[$n] . substr($line, strrpos($line, '<')) . "\n";
 				$n++;
 				$multiline = "";
+			} else if (substr($line, 0, 15) == '</string-array>') {
+				if ($skipStringArray) {
+					$multiline = "";
+					continue;
+				}
+				$outfile .= $line . "\n";
 			} else {
 				if ($multiline != "") {
 					$multiline .= $line;
@@ -218,12 +233,14 @@
 			// <string> lines
 			} else if (substr($line, 0, 8) == '<string ' && substr($line, -9) == '</string>') {
 				$out[]['type'] = 'string';
+				$translatable = (strpos($line, 'translatable="false"') !== false);
 				$namePos = strpos($line, 'name="') + 6;
 				$stringPos = strPos($line, '>', $namePos) + 1;
 				$name = substr($line, $namePos, strpos($line, '"', $namePos) - $namePos);
 				$string = substr($line, $stringPos, strrpos($line, '<') - $stringPos);
 				$out[count($out)-1]['name'] = $name;
 				$out[count($out)-1]['value'] = $string;
+				$out[count($out)-1]['translatable'] = $translatable;
 				$multiline = "";
 				
 			} else if ((substr(trim($line), 0, 8) == '<string ') && ($multiline == "")) {
@@ -233,20 +250,24 @@
 			} else if (substr($line, -9) == '</string>') {
 				$multiline .= $line;
 				$out[]['type'] = 'string';
+				$translatable = (strpos($multiline, 'translatable="false"') !== false);
 				$namePos = strpos($multiline, 'name="') + 6;
 				$stringPos = strPos($multiline, '>', $namePos) + 1;
 				$name = substr($multiline, $namePos, strpos($multiline, '"', $namePos) - $namePos);
 				$string = substr($multiline, $stringPos, strrpos($multiline, '<') - $stringPos);
 				$out[count($out)-1]['name'] = $name;
 				$out[count($out)-1]['value'] = $string;
+				$out[count($out)-1]['translatable'] = $translatable;
 				$multiline = "";
 				
 			// <string-array> lines
 			} else if (substr($line, 0, 13) == '<string-array') {
 				$out[]['type'] = 'stringarray';
+				$translatable = (strpos($line, 'translatable="false"') !== false);
 				$namePos = strpos($line, 'name="') + 6;
 				$name = substr($line, $namePos, strpos($line, '"', $namePos) - $namePos);
 				$out[count($out)-1]['name'] = $name;
+				$out[count($out)-1]['translatable'] = $translatable;
 				$multiline = "";
 				
 			// <item> lines
@@ -276,7 +297,7 @@
 		echo '</pre><br />';
 	}
 	
-	// Load the XML files
+	// Load the base XML file
 	$strings = parseStrings($basedir . '/values/strings.xml');
 	//dp($strings);
 	
@@ -314,6 +335,10 @@
 	
 	// For every string in the original (English) file
 	foreach ($strings as $string) {
+		
+		if ($string['translatable']) {
+			continue;
+		}
 		
 		$name = $string['name'];
 		$transtext = '';
