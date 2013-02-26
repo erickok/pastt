@@ -63,17 +63,18 @@ hu;Hungarian
 hy;Armenian
 hz;Herero
 ia;Interlingua
-id;Indonesian
 ie;Interlingue, Occidental
 ig;Igbo
 ii;Sichuan Yi, Nuosu
 ik;Inupiaq
+in;Indonesian
 io;Ido
 is;Icelandic
 it;Italian
 iu;Inuktitut
 iw;Hebrew
 ja;Japanese
+ji;Yiddish
 jv;Javanese
 ka;Georgian
 kg;Kongo
@@ -178,7 +179,6 @@ vo;Volapük
 wa;Walloon
 wo;Wolof
 xh;Xhosa
-yi;Yiddish
 yo;Yoruba
 za;Zhuang, Chuang
 zh;Chinese
