@@ -68,6 +68,11 @@
 		$multiline = "";
 		foreach ($lines as $line) {
 			
+			// Avoid looking up untranslatable strings
+			if (strpos($line, 'translatable="false"') !== false) {
+				continue;
+			}
+			
 			// <string> lines
 			$line = trim($line);
 			if (substr(trim($line), 0, 8) == '<string ' && substr($line, -9) == '</string>') {
