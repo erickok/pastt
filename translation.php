@@ -61,7 +61,12 @@
 				die('Please enter a name and valid email address. You can use the back button of the browser to recover your translations.');
 			}
 		}
-		
+
+		// Check captcha
+		if (!confirm_captcha_response($recaptcha_secret_key, $_POST["g-recaptcha-response"])) {
+			die('Error validating the security response. You can use the back button of the browser to recover your translations.');
+		}
+
 		// Traverse through the lines of the original strings file
 		$lines = file($basedir . '/values/strings.xml');
 		$outfile = "";
@@ -221,6 +226,13 @@
 			alert(\'Please enter a name and valid e-mail address.\');
 			return false;
 		}
+		function requireCaptcha() {
+			if (!grecaptcha.getResponse()) {
+				alert("Please confirm the captcha first.");
+				return false;
+			}
+			return true;
+		}
 	</script>
 
 	<h1>Translating to ' . $langname . ' (' . $lang . ')</h1>';
@@ -317,10 +329,18 @@
 	<p>No translation for this language currently exists. When saving for the first time, it will create a directory and the first strings.{timestamp}.xml for this new language.</p>';
 	}
 	
-	// Require the input of a name and email address?
-	$requireemailhtml = $requireemail? 'return(requireNameAndEmail());"': '';
+	// Require the input of a name and email address and/or captcha?
+	if ($requireemail && $requireCaptcha) {
+		$requirehtml = 'return(requireNameAndEmail() && requireCaptcha());';
+	} else if ($requireemail) {
+		$requirehtml = 'return(requireNameAndEmail());';
+	} else if ($requirecaptcha) {
+		$requirehtml = 'return(requireCaptcha());';
+	} else {
+		$requirehtml = '';
+	}
 	echo '
-	<form id="translationform" name="translationform" method="post" action="translation.php?lang=' . $lang . '" onsubmit="javascript:unloadOk=true;' . $requireemailhtml . '">
+	<form id="translationform" name="translationform" method="post" action="translation.php?lang=' . $lang . '" onsubmit="javascript:unloadOk=true;' . $requirehtml . '">
 	<table id="translationtable">
 		<tr>
 			<th id="key">Key</th>
@@ -393,7 +413,14 @@
 			<td colspan="2"><input type="input" id="pastt_translator_email" name="pastt_translator_email" value="" /></td>
 		</tr>';
 	}
-	
+
+	if($requirecaptcha) {
+		echo '
+		<tr>
+			<td colspan="3"><div style="text-align: center">' . render_captcha($recaptcha_site_key) . '</div></td>
+		</tr>';
+	}
+
 	echo '
 		<tr>
 			<td colspan="3"><input type="submit" id="submit" name="submit" value="Save updated translation" /></td>
