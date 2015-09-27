@@ -63,7 +63,7 @@
 		}
 
 		// Check captcha
-		if (!confirm_captcha_response($recaptcha_secret_key, $_POST["g-recaptcha-response"])) {
+		if ($requirecaptcha && !confirm_captcha_response($recaptcha_secret_key, $_POST["g-recaptcha-response"])) {
 			die('Error validating the security response. You can use the back button of the browser to recover your translations.');
 		}
 
