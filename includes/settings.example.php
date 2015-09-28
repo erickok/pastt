@@ -14,5 +14,10 @@
 	$frommail = '';
 	$askforemail = TRUE;
 	$requireemail = FALSE;
-	
+
+	// reCAPTCHA settings
+	$requirecaptcha = FALSE;
+	$recaptcha_site_key = '';
+	$recaptcha_secret_key = '';
+
 ?>

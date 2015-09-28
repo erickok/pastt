@@ -16,6 +16,7 @@
         <style type="text/css">
             @import url("includes/default.css");
         </style>
+        <?php if ($requirecaptcha) { echo "<script src=\"https://www.google.com/recaptcha/api.js\" async defer></script>"; } ?>
 </head>
 
 <body>
