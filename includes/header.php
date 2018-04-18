@@ -7,17 +7,33 @@
 	
 ?>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="en">
+<html lang="en">
 <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title><?php echo $pageTitle; ?></title>
-        <style type="text/css">
-            @import url("includes/default.css");
-        </style>
-        <?php if ($requirecaptcha) { echo "<script src=\"https://www.google.com/recaptcha/api.js\" async defer></script>"; } ?>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><?php echo $pageTitle; ?></title>
+    <?php if ($requirecaptcha) { echo "<script src=\"https://www.google.com/recaptcha/api.js\" async defer></script>"; } ?>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+    <style type="text/css">
+        body {
+          padding-top: 50px;
+        }
+        #pasttfooter {
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
 </head>
 
 <body>
 
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+	  <div class="container">
+	    <div class="navbar-header">
+	      <a class="navbar-brand" href=".">PASTT</a>
+	    </div>
+	  </div>
+	</nav>
