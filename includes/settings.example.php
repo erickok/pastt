@@ -14,7 +14,6 @@
 	$frommail = '';
 	$askforemail = TRUE;
 	$requireemail = FALSE;
-	$indentation = '    '; // four spaces
 
 	// reCAPTCHA settings
 	$requirecaptcha = FALSE;

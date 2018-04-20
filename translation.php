@@ -87,7 +87,7 @@
 				//$newValue = stripslashes($_POST[$name]);
 				$newValue = str_replace("\n","\\n",$_POST[$name]);
 				if (trim($newValue) != '') {
-					$outfile .= $indentation . substr($line, 0, $stringPos) . $newValue . substr($line, strrpos($line, '<')) . "\n";
+					$outfile .= substr($line, 0, $stringPos) . $newValue . substr($line, strrpos($line, '<')) . "\n";
 				}
 				$multiline = "";
 				
