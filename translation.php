@@ -235,7 +235,9 @@
 		}
 	</script>
 
-	<h1>Translating to ' . $langname . ' (' . $lang . ')</h1>';
+	<div class="container">
+	<h3>' . $langname . ' (' . $lang . ')</h3>
+		<div class="container">';
 	
 	function parseStrings($file) {
 		$lines = file($file);
@@ -318,16 +320,20 @@
 	$strings = parseStrings($basedir . '/values/strings.xml');
 	//dp($strings);
 	
+	echo '
+			<div class="row">';
 	// Load the translation XML file, if it exists
 	if (isset($newesttranslation)) {
 		echo '
-	<p>You are working with the last-saved translation \'<a href="res/values-' . $lang . '/' . $newesttranslation . '">' . $newesttranslation . '</a>\' (saved ' . date('d F Y H:i', filemtime($basedir . '/values-' . $lang . '/' . $newesttranslation)) . '). When you save your updates it will not override it but make a new copy.</p>
-	<p id="showmissingrow"><input type="button" id="showmissing" name="showmissing" value="Show only missing translations" onclick="javascript:flipShowOnlyMissing();" /></p>';
+				<p>You are working with the last-saved translation \'<a href="res/values-' . $lang . '/' . $newesttranslation . '">' . $newesttranslation . '</a>\' (saved ' . date('d F Y H:i', filemtime($basedir . '/values-' . $lang . '/' . $newesttranslation)) . '). When you save your updates it will not override it but make a new copy.</p>
+				<p id="showmissingrow"><input class="btn btn-large btn-primary" type="button" id="showmissing" name="showmissing" value="Show only missing translations" onclick="javascript:flipShowOnlyMissing();" /></p>';
 		$translations = parseStrings($basedir . '/values-' . $lang . '/' . $newesttranslation);
 	} else {
 		echo '
-	<p>No translation for this language currently exists. When saving for the first time, it will create a directory and the first strings.{timestamp}.xml for this new language.</p>';
+				<p>No translation for this language currently exists. When saving for the first time, it will create a directory and the first strings.{timestamp}.xml for this new language.</p>';
 	}
+	echo '
+			</div>';
 	
 	// Require the input of a name and email address and/or captcha?
 	if ($requireemail && $requireCaptcha) {
@@ -339,17 +345,20 @@
 	} else {
 		$requirehtml = '';
 	}
+
 	echo '
-	<form id="translationform" name="translationform" method="post" action="translation.php?lang=' . $lang . '" onsubmit="javascript:unloadOk=true;' . $requirehtml . '">
-	<table id="translationtable">
-		<tr>
-			<th id="key">Key</th>
-			<th id="org">English</th>
-			<th id="trans">' . $langname . ' (' . $lang . ')</th>
-		</tr>';
-	
-	$isuneven = false;
-	$classuneven = ' class="uneven"';
+			<form id="translationform" name="translationform" method="post" action="translation.php?lang=' . $lang . '" onsubmit="javascript:unloadOk=true;' . $requirehtml . '">
+			<div class="row">
+				<div class="table-responsive">
+				<table class="table table-striped" id="translationtable">
+					<thead>
+						<tr>
+							<th class="col-xs-1 col-sm-2" id="key">Key</th>
+							<th class="col-xs-1 col-sm-2" id="org">English</th>
+							<th class="col-xs-10 col-sm-8" id="trans">' . $langname . ' (' . $lang . ')</th>
+						</tr>
+					</thead>
+					<tbody>';
 	
 	function encodeForHtml($in) {
 		return htmlspecialchars($in);
@@ -385,51 +394,50 @@
 
 		// Show a table row that has the key, the original English text and a input box with the translation text that is editable
 		echo '
-		<tr' . ($isuneven? $classuneven: '') . '>
-			<td>' . $name . '</td>
-			<td>' . str_replace("\\n","<br/>",encodeForHtml($value)) . '</td>
-			<td>';
+						<tr>
+							<td class="col-sm-2">' . $name . '</td>
+							<td class="col-sm-2">' . str_replace("\\n","<br/>",encodeForHtml($value)) . '</td>
+							<td class="col-sm-8">';
 			
-			if (strpos(encodeForInput($value),"\\n") !== FALSE) echo '<textarea style="word-wrap: break-word;height:10em;width:100%" id="' . $name . '" name="' . $name . '">' . str_replace("\\n","\n",encodeForInput($transtext)) . '</textarea>';
-			else echo '<input style="word-wrap: break-word;" type="text" id="' . $name . '" name="' . $name . '" value="' . encodeForInput($transtext) . '" /></td>';
-		echo '</tr>';
-		
-		$isuneven = !$isuneven;
-		
+			if (strpos(encodeForInput($value),"\\n") !== FALSE) echo '<textarea class="form-control" id="' . $name . '" name="' . $name . '">' . str_replace("\\n","\n",encodeForInput($transtext)) . '</textarea>';
+			else echo '<input class="form-control" type="text" id="' . $name . '" name="' . $name . '" value="' . encodeForInput($transtext) . '" /></td>';
+		echo '
+						</tr>';
 	}
 	
+	echo '
+					</tbody>
+				</table>
+				</div>
+			</div>
+			<div class="row">
+				<div class="well">';
 	if ($askforemail) {
 		$requiredfieldhtml = $requireemail? ' <strong>Your are required to fill in your name and e-mail address:</strong>': 'Please fill in your name and e-mail address:';
 		echo '
-		<tr>
-			<td colspan="3">' . $requiredfieldhtml . '</td>
-		</tr>
-		<tr>
-			<td>Name:</td>
-			<td colspan="2"><input type="input" id="pastt_translator_name" name="pastt_translator_name" value="" /></td>
-		</tr>
-		<tr>
-			<td>E-mail:</td>
-			<td colspan="2"><input type="input" id="pastt_translator_email" name="pastt_translator_email" value="" /></td>
-		</tr>';
+					<p>' . $requiredfieldhtml . '</p>
+					<div class="form-group">
+						<label for="pastt_translator_name">Name</label>
+						<input type="input" class="form-control" id="pastt_translator_name" name="pastt_translator_name" value="" />
+					</div>
+					<div class="form-group">
+						<label for="pastt_translator_email">E-mail:</label>
+						<input type="input" class="form-control" id="pastt_translator_email" name="pastt_translator_email" value="" />
+					</div>';
 	}
 
 	if($requirecaptcha) {
 		echo '
-		<tr>
-			<td colspan="3"><div style="text-align: center">' . render_captcha($recaptcha_site_key) . '</div></td>
-		</tr>';
+					<div style="text-align: center">' . render_captcha($recaptcha_site_key) . '</div>';
 	}
 
 	echo '
-		<tr>
-			<td colspan="3"><input type="submit" id="submit" name="submit" value="Save updated translation" /></td>
-		</tr>
-		<tr>
-			<td colspan="3" style="text-align: center;"><a href="./">or go back without saving</a></td>
-		</tr>
-	</table>
-	</form>';
+					<input type="submit" class="btn btn-primary" id="submit" name="submit" value="Save updated translation" />
+				</div>
+			</div>
+			</form>
+		</div>
+	</div>';
 	
 	include('includes/footer.php');
 
