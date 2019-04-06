@@ -5,6 +5,12 @@
 	// Licensed Apache License 2.0
 	// http://www.apache.org/licenses/LICENSE-2.0
 	
+	if (!function_exists('set_magic_quotes_runtime')) {
+		function set_magic_quotes_runtime($new_setting) {
+			return true;
+		}
+	}
+
 	error_reporting(E_ALL);
 	@set_magic_quotes_runtime(FALSE);
 	
