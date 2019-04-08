@@ -161,8 +161,8 @@
 			
 			# Anti-header-injection
 			# By Victor Benincasa <vbenincasa(AT)gmail.com>
-			foreach($_REQUEST as $fields => $value) if(@eregi("TO:", $value) || @eregi("CC:", $value) || 
-				@eregi("CCO:", $value) || @eregi("Content-Type", $value)) exit("ERROR: Code injection attempt denied! " .
+			foreach($_REQUEST as $fields => $value) if(@preg_match("TO:", $value) || @eregi("CC:", $value) || 
+				@preg_match("CCO:", $value) || @preg_match("Content-Type", $value)) exit("ERROR: Code injection attempt denied! " .
 				"Please don't use the following sequences in your message: 'TO:', 'CC:', 'CCO:' or 'Content-Type'.");
 
 			mail(
