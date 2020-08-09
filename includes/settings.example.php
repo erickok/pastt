@@ -21,4 +21,9 @@
 	$recaptcha_site_key = '';
 	$recaptcha_secret_key = '';
 
+	// Plurals types per language
+	$langPlurals['pl'] = array('one', 'few', 'many');
+	$langPlurals['es-rMX'] = array('one', 'other');
+	$langPlurals['pt-rBR'] = array('one', 'other');
+
 ?>

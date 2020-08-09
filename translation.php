@@ -84,7 +84,6 @@
 				$namePos = strpos($line, 'name="') + 6;
 				$stringPos = strPos($line, '>', $namePos) + 1;
 				$name = substr($line, $namePos, strpos($line, '"', $namePos) - $namePos);
-				//$newValue = stripslashes($_POST[$name]);
 				$newValue = str_replace("\n","\\n",$_POST[$name]);
 				if (trim($newValue) != '') {
 					$outfile .= $indentation . substr($line, 0, $stringPos) . $newValue . substr($line, strrpos($line, '<')) . "\n";
@@ -127,12 +126,34 @@
 				$outfile .= substr($line, 0, 6) . $newValues[$n] . substr($line, strrpos($line, '<')) . "\n";
 				$n++;
 				$multiline = "";
+			// </string-array> lines
 			} else if (substr($line, 0, 15) == '</string-array>') {
 				if ($skipStringArray) {
 					$multiline = "";
 					continue;
 				}
 				$outfile .= $line . "\n";
+			// <plurals lines
+			} else if (substr($line, 0, 8) == '<plurals') {
+				$namePos = strpos($line, 'name="') + 6;
+				$name = substr($line, $namePos, strpos($line, '"', $namePos) - $namePos);
+				$quantityTypes = getQuantitiesInLang($langPlurals, $lang);
+				$outfile .= $indentation . $line . "\n";
+				foreach ($quantityTypes as $type) {
+					$quantityName = $name . "_quantity_" . $type;
+					$newValue = str_replace("\n","\\n", stripslashes($_POST[$quantityName]));
+					$outfile .= $indentation . $indentation . "<item quantity=\"" . $type . "\">" . $newValue . "</item>" . "\n";
+				}
+			// <item quantity= lines
+			} else if (substr($line, 0, 15) == '<item quantity=') {
+				continue;
+			// </plurals> lines
+			} else if (substr($line, 0, 10) == '</plurals>') {
+				if ($skipStringArray) {
+					$multiline = "";
+					continue;
+				}
+				$outfile .= $indentation . $line . "\n";
 			} else {
 				if ($multiline != "") {
 					$multiline .= $line;
@@ -294,7 +315,26 @@
 				$val = substr($line, 6, strrpos($line, '<') - 6);
 				$out[count($out)-1]['values'][] = $val;
 				$multiline = "";
-				
+
+			// <plurals> lines
+			} else if (substr($line, 0, 8) == '<plurals') {
+				$out[]['type'] = 'plurals';
+				$translatable = (strpos($line, 'translatable="false"') !== false);
+				$namePos = strpos($line, 'name="') + 6;
+				$name = substr($line, $namePos, strpos($line, '"', $namePos) - $namePos);
+				$out[count($out)-1]['name'] = $name;
+				$out[count($out)-1]['translatable'] = $translatable;
+				$multiline = "";
+
+			// <item quantity= lines
+			} else if (substr($line, 0, 15) == '<item quantity=') {
+				$quantityPos = strpos($line, 'quantity="') + 10;
+				$quantity = substr($line, $quantityPos, strrpos($line, '"', $quantityPos) - $quantityPos);
+				$valPos = strPos($line, '>') + 1;
+				$val = substr($line, $valPos, strrpos($line, '<') - $valPos);
+				$out[count($out)-1]['values'][$quantity] = $val;
+				$multiline = "";
+
 			} else if ($multiline != ""){
 				$multiline .= $line;
 			}
@@ -383,26 +423,52 @@
 				$trans = findTranslation($translations, $name);
 				$transtext = $trans['value'];
 			}
+			showRow($name, $value, $transtext);
 		} else if ($string['type'] == 'stringarray') {
 			$value = implode($arraySeparator, $string['values']);
 			if (isset($translations)) {
 				$trans = findTranslation($translations, $name);
 				$transtext = implode($arraySeparator, $trans['values']);
 			}
+			showRow($name, $value, $transtext);
+		} else if ($string['type'] == 'plurals') {
+			$quantityTypes = getQuantitiesInLang($langPlurals, $lang);
+			foreach ($quantityTypes as $type) {
+				$quantityName = $name . "_quantity_" . $type;
+				if (isset($translations)) {
+					$trans = findTranslation($translations, $name);
+					$transtext = $trans['values'][$type];
+				}
+				if ($type == 'one') {
+					$value = $string['values']['one'];
+				} else {
+					$value = $string['values']['other'];
+				}
+				showRow($quantityName, $value, $transtext);
+			}
 		}
-		//dp($trans);
+	}
 
+	function showRow($name, $value, $transtext) {
 		// Show a table row that has the key, the original English text and a input box with the translation text that is editable
 		echo '
 						<tr>
 							<td class="col-sm-2">' . $name . '</td>
 							<td class="col-sm-2">' . str_replace("\\n","<br/>",encodeForHtml($value)) . '</td>
 							<td class="col-sm-8">';
-			
-			if (strpos(encodeForInput($value),"\\n") !== FALSE) echo '<textarea class="form-control" id="' . $name . '" name="' . $name . '">' . str_replace("\\n","\n",encodeForInput($transtext)) . '</textarea>';
-			else echo '<input class="form-control" type="text" id="' . $name . '" name="' . $name . '" value="' . encodeForInput($transtext) . '" /></td>';
+
+		if (strpos(encodeForInput($value),"\\n") !== FALSE) echo '<textarea class="form-control" id="' . $name . '" name="' . $name . '">' . str_replace("\\n","\n",encodeForInput($transtext)) . '</textarea>';
+		else echo '<input class="form-control" type="text" id="' . $name . '" name="' . $name . '" value="' . encodeForInput($transtext) . '" /></td>';
 		echo '
 						</tr>';
+	}
+
+	function getQuantitiesInLang($langPlurals, $lang) {
+		if ($langPlurals[$lang]) {
+			return $langPlurals[$lang];
+		}
+		// Language is not set up for plurals, fallback to enable all possible plurals
+		return array('zero', 'one', 'two', 'few', 'many', 'other');
 	}
 	
 	echo '
