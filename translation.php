@@ -138,22 +138,29 @@
 				$namePos = strpos($line, 'name="') + 6;
 				$name = substr($line, $namePos, strpos($line, '"', $namePos) - $namePos);
 				$quantityTypes = getQuantitiesInLang($langPlurals, $lang);
-				$outfile .= $indentation . $line . "\n";
+				// Check if there is at least one translation in this plural, otherwise we don't output it at all
+				$hasAtLeastOneTranslation = false;
 				foreach ($quantityTypes as $type) {
 					$quantityName = $name . "_quantity_" . $type;
-					$newValue = str_replace("\n","\\n", stripslashes($_POST[$quantityName]));
-					$outfile .= $indentation . $indentation . "<item quantity=\"" . $type . "\">" . $newValue . "</item>" . "\n";
+					if (!empty($_POST[$quantityName])) $hasAtLeastOneTranslation = true;
+				}
+				if ($hasAtLeastOneTranslation) {
+					$outfile .= $indentation . $line . "\n";
+					foreach ($quantityTypes as $type) {
+						$quantityName = $name . "_quantity_" . $type;
+						$newValue = str_replace("\n","\\n", stripslashes($_POST[$quantityName]));
+						if (!empty($newValue)) { // Don't print untranslated plurals (they will override the default English text)
+							$outfile .= $indentation . $indentation . "<item quantity=\"" . $type . "\">" . $newValue . "</item>" . "\n";
+						}
+					}
+					$outfile .= $indentation . "</plurals>\n";
 				}
 			// <item quantity= lines
 			} else if (substr($line, 0, 15) == '<item quantity=') {
 				continue;
 			// </plurals> lines
 			} else if (substr($line, 0, 10) == '</plurals>') {
-				if ($skipStringArray) {
-					$multiline = "";
-					continue;
-				}
-				$outfile .= $indentation . $line . "\n";
+				continue; // Already printed as part of the plural
 			} else {
 				if ($multiline != "") {
 					$multiline .= $line;
